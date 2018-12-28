@@ -175,6 +175,7 @@ def generate_problems(num):
 def hill_climbing(epproblem,heuristic=manhattanHeuristic):
     print("\n-------------------------\nTrace Start:") #TODO: trace
     # from sys import maxsize as INF
+
     cur = (epproblem.get_startstate())
     while not cur.is_goal():
 
@@ -197,6 +198,37 @@ def hill_climbing(epproblem,heuristic=manhattanHeuristic):
             return min_si
     print("\nEnd Trace\n-------------------------\n")  # TODO: trace
     return cur
+
+
+def hill_climbing_multiproblem(epproblems, heuristic=manhattanHeuristic):
+    print("\n-------------------------\nTrace Start:")  # TODO: trace
+    from sys import maxsize as INF
+    def get_min_of_state(_state):
+        min_state = _state
+        min_cost = _state.get_cost(heuristic)
+        for succ in _state.get_valid_succesores():
+            succ_cost = succ.get_cost(heuristic)
+            print("\t", succ, "\tmin_cost:", min_cost, "\tsucc_cost:", succ_cost)  # TODO : trace
+            if succ_cost < min_cost:
+                min_cost = succ_cost
+                min_state = succ
+        return (min_state,min_cost)
+
+
+    min_state = None
+    min_cost = INF
+    count = 0
+    for p in epproblems:
+        count +=1
+        cur_s = p.get_startstate()
+        s = get_min_of_state(cur_s)
+        print("p =",count,") min_state:",s[0],"\tmin_c:" , min_cost, "\ts_cost:", s[1])  # TODO : trace
+        if s[1] < min_cost:
+            min_cost=s[1]
+            min_state = s[0]
+
+    print("\nEnd Trace\n-------------------------\n")  # TODO: trace
+    return min_state
 
 
 def test():
@@ -226,7 +258,19 @@ def test2(n):
         print("Final State: ", final)
         final.Print()
 
+def test3(n):
+    probs = generate_problems(n)
+    count = 0
+    for p in probs:
+        s = p.get_startstate()
+        count += 1
+        print("Problem #",count,":",s.get_cost(),s)
+        s.Print()
+        # print("cost:", s.get_cost())
+    final = hill_climbing_multiproblem(probs)
+    print("Final Cost:", final.get_cost())
+    print("Final State: ", final)
+    final.Print()
 
 
-
-test2(20)
+test3(3)
