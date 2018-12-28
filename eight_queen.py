@@ -98,16 +98,24 @@ class eqProblem:
         return numOfKishs(state)==0
 
     @staticmethod
-    def get_succesores(state,i):
+    def get_succesores(state,i,numofsuccesores=2):
         res = []
+        n2 = int(numofsuccesores /2)
         cpy1 = list(copy.copy(state))
         cpy2 = list(copy.copy(state))
-        if cpy1[i] < 7 :
-            cpy1[i] += 1
-            res.append(cpy1)
-        if cpy2[i] > 0 :
-            cpy2[i] -= 1
-            res.append(cpy2)
+        for r in range(-(n2+numofsuccesores%2),n2+1):
+            if r==0: continue
+            cpy = list(copy.copy(state))
+            cpy[i] = (cpy[i] + r) % 8
+            res.append(tuple(cpy))
+        # for r in range(0,n2):
+        #
+        # if cpy1[i] < 7 :
+        #     cpy1[i] += 1
+        #     res.append(cpy1)
+        # if cpy2[i] > 0 :
+        #     cpy2[i] -= 1
+        #     res.append(cpy2)
 
         return res
 
@@ -139,34 +147,49 @@ def generate_problems(num):
     return problems
 
 
-def hill_climbing(eqproblem,heuristic=numOfKishs):
+def hill_climbing(eqproblem,numOfSuccesores=2,heuristic=numOfKishs):
+    print("\n-------------------------\nTrace Start:") #TODO: trace
     from sys import maxsize as INF
     cur = eqproblem.get_startstate()
-    closed = []
     while not eqProblem.is_goal(cur):
+        min_c = eqProblem.get_cost(cur,heuristic)
         for i in range(8):
-            min_s = cur
-            min_c = INF
-            for s in eqproblem.get_succesores(cur,i):
-                if s in closed: continue
-                c = eqProblem.get_cost(s)
-                eqProblem.Print(s)
-                if c <= min_c :
-                    closed.append(s)
-                    min_c = c
-                    min_s = s
-            cur = min_s
-
+            print("i =",i,") Min_C:",min_c,"\tCurr:",cur) # TODO : trace
+            min_si = cur
+            min_ci = eqProblem.get_cost(cur,heuristic)
+            for si in eqproblem.get_succesores(cur,i,numOfSuccesores):
+                c = eqProblem.get_cost(si,heuristic)
+                print("\t",si,"\tmin_ci:",min_ci,"\tc:",c) # TODO : trace
+                if c <= min_ci :
+                    min_ci = c
+                    min_si = si
+            if min_ci <= min_c: cur = min_si
+            if min_ci < min_c : min_c = min_ci
+            else:
+                print("\nEnd Trace\n-------------------------\n")  # TODO: trace
+                return min_si
+    print("\nEnd Trace\n-------------------------\n")  # TODO: trace
     return cur
 
-def test():
+def test1():
     state = generate_problem()
-
     p = eqProblem(state)
-    print(state)
-    print("")
+    print("Start State: ",state)
+    print("numOfKishs:", numOfKishs(state),"\n")
     eqProblem.Print(state)
-    print(numOfKishs(state))
-    print(hill_climbing(p))
+    final = hill_climbing(p)
+    print("\nFinal State: ",final)
+    eqProblem.Print(final)
 
-test()
+def test2(numOfSuccsesores):
+    state = generate_problem()
+    p = eqProblem(state)
+    print("Start State: ",state)
+    print("numOfKishs:", numOfKishs(state),"\n")
+    eqProblem.Print(state)
+    final = hill_climbing(p,numOfSuccsesores)
+    print("\nFinal State: ",final)
+    print("numOfKishs:", numOfKishs(final), "\n")
+    eqProblem.Print(final)
+
+test2(7)
