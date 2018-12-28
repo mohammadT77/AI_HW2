@@ -149,7 +149,6 @@ def generate_problems(num):
 
 def hill_climbing(eqproblem,numOfSuccesores=2,heuristic=numOfKishs):
     print("\n-------------------------\nTrace Start:") #TODO: trace
-    from sys import maxsize as INF
     cur = eqproblem.get_startstate()
     while not eqProblem.is_goal(cur):
         min_c = eqProblem.get_cost(cur,heuristic)
@@ -170,6 +169,48 @@ def hill_climbing(eqproblem,numOfSuccesores=2,heuristic=numOfKishs):
                 return min_si
     print("\nEnd Trace\n-------------------------\n")  # TODO: trace
     return cur
+
+def hill_climbing_multiproblem(eqproblems,numOfSuccesores=2,heuristic=numOfKishs):
+    print("\n-------------------------\nTrace Start:")  # TODO: trace
+    from sys import maxsize as INF
+    def get_min_of_succs(State,I):
+        min_state = State
+        min_cost = INF
+        for S in eqProblem.get_succesores(State,I,numOfSuccesores):
+            C = eqProblem.get_cost(S, heuristic)
+            print("\t\t", S, "\tmin_cost:", min_cost, "\tC:", C)  # TODO : trace
+            if C <= min_cost:
+                min_cost = C
+                min_state = S
+        return (min_state,min_cost)
+
+    def get_min_of_state(State):
+        min_state = State
+        min_cost = INF
+        for i in range(8):
+            min_succ = get_min_of_succs(State,i)
+            print("\ti =", i, ")",min_succ[0], "\tmin_cost:", min_cost, "\tC:", min_succ[1])  # TODO : trace
+            if min_succ[1]<min_cost :
+                min_cost = min_succ[1]
+                min_state = min_succ[0]
+        return (min_state,min_cost)
+
+    curs = [i.get_startstate() for i in eqproblems]
+
+    min_state = None
+    min_cost = INF
+    count = 0
+    for cs in curs:
+        count+=1
+        s = get_min_of_state(cs)
+        print("p =", count, ")", s[0], "\tmin_cost:", min_cost, "\tC:", s[1])  # TODO : trace
+        if s[1]<min_cost:
+            min_cost=s[1]
+            min_state = s[0]
+    print("res:",min_state)
+    print("\nEnd Trace\n-------------------------\n")  # TODO: trace
+    return min_state
+
 
 def test1():
     state = generate_problem()
@@ -192,4 +233,17 @@ def test2(numOfSuccsesores):
     print("numOfKishs:", numOfKishs(final), "\n")
     eqProblem.Print(final)
 
-test2(7)
+def test3(numOfProblems):
+    states = generate_problems(numOfProblems)
+    probs =  [eqProblem(s) for s in states]
+    count = 0
+    for p in probs:
+        count+=1
+        print("Problem #",count,":",p.get_startstate())
+    final = hill_climbing_multiproblem(probs,7)
+    print("\nFinal State: ", final)
+    print("numOfKishs:", numOfKishs(final), "\n")
+    eqProblem.Print(final)
+
+
+test3(20)
